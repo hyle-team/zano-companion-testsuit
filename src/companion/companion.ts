@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
+import { ZanoCredentials, type ZanoCredentialsParams } from "./credentials";
 import type { ZanoCompanionMethods } from "./types";
 
 declare global {
@@ -21,12 +22,10 @@ export type ZanoCompanionServerData = {
   message: string;
   isSavedData: boolean | undefined;
 };
-export interface ZanoCompanionParams {
+export type ZanoCompanionParams = ZanoCredentialsParams & {
   verbose?: boolean;
 
-  useLocalStorage?: boolean; // default: true
   aliasRequired?: boolean;
-  customLocalStorageKey?: string;
   customNonce?: string;
   customServerPath?: string;
   disableServerRequest?: boolean;
@@ -35,20 +34,11 @@ export interface ZanoCompanionParams {
   onConnectEnd?: (data: ZanoCompanionServerData & { token: string }) => void;
   onConnectError?: (message: string) => void;
   onLocalConnectEnd?: (data: ZanoCompanionServerData) => void;
-}
-export interface ZanoCompanionCredentials {
-  nonce: string;
-  signature: string;
-  publicKey: string;
-  address: string;
-}
+};
 
 type AuthServerResponse = { success: true; data: { token: string } } | { success: false; error: string };
 
 export class ZanoCompanion {
-  private DEFAULT_LOCAL_STORAGE_KEY = "wallet";
-  private localStorageKey: string;
-
   private params: ZanoCompanionParams;
   readonly zanoWallet: {
     [Method in keyof ZanoCompanionMethods]: (
@@ -93,7 +83,7 @@ export class ZanoCompanion {
         },
       },
     ) as never;
-    this.localStorageKey = params.customLocalStorageKey || this.DEFAULT_LOCAL_STORAGE_KEY;
+    this.credentials = new ZanoCredentials(params);
   }
 
   private handleError({ message }: { message: string }) {
@@ -104,51 +94,7 @@ export class ZanoCompanion {
     }
   }
 
-  readonly credentials = (() => {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const companion = this;
-    let stored = (() => {
-      if (!this.params.useLocalStorage) return null;
-      const json = localStorage.getItem(this.localStorageKey);
-      if (json === null) return null;
-      try {
-        const parsed = JSON.parse(json) as ZanoCompanionCredentials;
-        return parsed;
-      } catch {
-        return null;
-      }
-    })();
-    const listeners = new Set<(credentials: ZanoCompanionCredentials | null) => void>();
-    const emit = async (credentials: ZanoCompanionCredentials | null) => {
-      await Promise.resolve();
-      listeners.forEach((listener) => listener(credentials));
-    };
-    return {
-      addListener(listener: (credentials: ZanoCompanionCredentials | null) => void) {
-        listeners.add(listener);
-        return () => listeners.delete(listener);
-      },
-      removeListener(listener: (credentials: ZanoCompanionCredentials | null) => void) {
-        listeners.delete(listener);
-      },
-      get() {
-        return stored;
-      },
-      clear() {
-        if (companion.params.useLocalStorage) localStorage.removeItem(companion.localStorageKey);
-        stored = null;
-        void emit(null);
-      },
-      set(credentials: ZanoCompanionCredentials | null) {
-        stored = credentials;
-        if (companion.params.useLocalStorage) {
-          if (credentials) localStorage.setItem(companion.localStorageKey, JSON.stringify(credentials));
-          else localStorage.removeItem(companion.localStorageKey);
-        }
-        void emit(credentials);
-      },
-    };
-  })();
+  readonly credentials: ZanoCredentials;
 
   async connect(signal?: AbortSignal) {
     if (signal?.aborted) throw signal.reason;

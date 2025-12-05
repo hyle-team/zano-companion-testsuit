@@ -10,7 +10,8 @@ import {
   type SetStateAction,
 } from "react";
 import { assert } from "../utils";
-import { ZanoCompanion, type ZanoCompanionCredentials, type ZanoCompanionParams } from "./companion";
+import { ZanoCompanion, type ZanoCompanionParams } from "./companion";
+import type { IZanoCredentials } from "./credentials";
 
 export const useZanoCompanionInstance = ({
   onConnectStart,
@@ -61,8 +62,8 @@ export const useZanoCompanionCredentials = (companion?: ZanoCompanion) => {
     () => companion.credentials.get(),
   );
   const setCredentials = useCallback(
-    (action: SetStateAction<ZanoCompanionCredentials | null>) => {
-      let next: ZanoCompanionCredentials | null;
+    (action: SetStateAction<IZanoCredentials | null>) => {
+      let next: IZanoCredentials | null;
       if (typeof action === "function") next = action(companion.credentials.get());
       else next = action;
       companion.credentials.set(next);
@@ -72,16 +73,33 @@ export const useZanoCompanionCredentials = (companion?: ZanoCompanion) => {
   return [credentials, setCredentials] as const;
 };
 
-export const useZanoCompanionConnectionEffect = (companion?: ZanoCompanion) => {
+export const useZanoCompanionConnect = (companion?: ZanoCompanion) => {
   companion = useZanoCompanion(companion);
-  const [connecting, setConnecting] = useState(false);
-  useEffect(() => {
+  const [state, setState] = useState<"idle" | "pending" | "connected">("idle");
+  const connect = useCallback(() => {
     const controller = new AbortController();
-    setConnecting(true);
-    void companion.connect(controller.signal).finally(() => {
-      setConnecting(false);
-    });
+    setState("pending");
+    void companion.connect(controller.signal).then(
+      () => setState("connected"),
+      () => setState("idle"),
+    );
     return () => controller.abort();
   }, [companion]);
-  return connecting;
+  const disconnect = useCallback(() => {
+    companion.credentials.clear();
+    setState("idle");
+  }, [companion]);
+  return [state, connect, disconnect] as const;
+};
+
+export const useZanoCompanionConnectEffect = (companion?: ZanoCompanion) => {
+  const [state, connect, disconnect] = useZanoCompanionConnect(companion);
+  useEffect(() => {
+    const abort = connect();
+    return () => {
+      abort();
+      disconnect();
+    };
+  }, [connect, disconnect]);
+  return state;
 };
