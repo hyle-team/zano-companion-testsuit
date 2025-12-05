@@ -1,15 +1,13 @@
 @import './theme.css';
 @import './button.css';
+@import './group.css';
 
 :root {
   color: var(--foreground);
   font-family: system-ui, sans-serif;
   font-size: 16px;
   font-weight: 400;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  text-size-adjust: unset;
 
   background-color: var(--background);
 }

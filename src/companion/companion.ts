@@ -100,22 +100,25 @@ export class ZanoCompanion {
     if (signal?.aborted) throw signal.reason;
     this.params.onConnectStart?.();
 
+    if (this.params.verbose) console.log("getting walletData");
     const walletData = await this.zanoWallet.GET_WALLET_DATA().catch(() => undefined);
     if (signal?.aborted) throw signal.reason;
     if (!walletData?.address) return this.handleError({ message: "Companion is offline" });
     if (this.params.aliasRequired && !walletData.alias) return this.handleError({ message: "Alias not found" });
-    if (this.params.verbose) console.log("walletData", walletData);
+    if (this.params.verbose) console.log("walletData:", walletData);
 
     let nonce = "";
     let signature = "";
     let publicKey = "";
     const stored = this.credentials.get();
+    if (stored && this.params.verbose) console.log("stored wallet:", stored);
     if (stored?.address === walletData.address) {
-      if (this.params.verbose) console.log("existingWallet", stored);
       ({ nonce, signature, publicKey } = stored);
     } else {
       const generatedNonce = this.params.customNonce ?? uuidv4();
+      if (this.params.verbose) console.log("getting signature:", generatedNonce);
       const signResult = await this.zanoWallet.REQUEST_MESSAGE_SIGN({ message: generatedNonce }).catch(() => undefined);
+      if (this.params.verbose) console.log("signature:", signResult);
       if (signal?.aborted) throw signal.reason;
       if (!signResult?.result) return this.handleError({ message: "Failed to sign message" });
 
@@ -132,9 +135,11 @@ export class ZanoCompanion {
       message: nonce,
       isSavedData: !!stored,
     };
+    if (this.params.verbose) console.log("connected:", serverData);
     this.params.onLocalConnectEnd?.(serverData);
 
     if (!this.params.disableServerRequest) {
+      if (this.params.verbose) console.log("authenticating");
       const result = await fetch(this.params.customServerPath ?? "/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -144,11 +149,13 @@ export class ZanoCompanion {
         .then((response) => response.json() as Promise<AuthServerResponse>)
         .catch((error) => ({ success: false, error: error instanceof Error ? error.message : String(error) }) as AuthServerResponse);
       if (signal?.aborted) throw signal.reason;
+      if (this.params.verbose) console.log("authentication result:", result);
       if (!result) return this.handleError({ message: "Unexpected server response" });
       if (!result.success) return this.handleError({ message: result.error });
-      if (!stored) this.credentials.set({ publicKey, signature, nonce, address: walletData.address });
+      if (this.params.verbose) console.log("authenticated:", result.data.token);
       this.params.onConnectEnd?.({ ...serverData, token: result.data.token });
     }
+    if (!stored) this.credentials.set({ publicKey, signature, nonce, address: walletData.address });
 
     return true;
   }

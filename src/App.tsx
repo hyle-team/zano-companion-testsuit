@@ -3,6 +3,7 @@ import "./app.css";
 import { ZanoCompanionProvider } from "./companion";
 import { Connector } from "./Connector";
 import { Counter } from "./Counter";
+import { Credentials } from "./Credentials";
 import ZanoLogo from "./zano.svg";
 
 export const App = () => {
@@ -13,9 +14,10 @@ export const App = () => {
         <span>Zano Companion Test Suits</span>
       </div>
       <div id="content">
-        <ZanoCompanionProvider>
+        <ZanoCompanionProvider disableServerRequest verbose>
           <Counter />
           <Connector />
+          <Credentials />
         </ZanoCompanionProvider>
       </div>
     </div>

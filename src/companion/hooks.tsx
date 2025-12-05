@@ -44,8 +44,8 @@ export const useZanoCompanionInstance = ({
 };
 
 const ZanoCompanionContext = createContext<ZanoCompanion | undefined>(undefined);
-export const ZanoCompanionProvider = ({ children }: { children?: ReactNode } & ZanoCompanionParams) => {
-  const companion = useZanoCompanionInstance();
+export const ZanoCompanionProvider = ({ children, ...params }: { children?: ReactNode } & ZanoCompanionParams) => {
+  const companion = useZanoCompanionInstance(params);
   return <ZanoCompanionContext.Provider value={companion}>{children}</ZanoCompanionContext.Provider>;
 };
 export const useZanoCompanion = (companion?: ZanoCompanion) => {
@@ -75,20 +75,22 @@ export const useZanoCompanionCredentials = (companion?: ZanoCompanion) => {
 
 export const useZanoCompanionConnect = (companion?: ZanoCompanion) => {
   companion = useZanoCompanion(companion);
-  const [state, setState] = useState<"idle" | "pending" | "connected">("idle");
+  const [credentials, setCredentials] = useZanoCompanionCredentials(companion);
+  const [pending, setPending] = useState(false);
+  const pendingRef = useRef(pending);
+  pendingRef.current = pending;
   const connect = useCallback(() => {
+    if (pendingRef.current) throw new Error("Companion is connecting");
     const controller = new AbortController();
-    setState("pending");
-    void companion.connect(controller.signal).then(
-      () => setState("connected"),
-      () => setState("idle"),
-    );
+    setPending(true);
+    void companion.connect(controller.signal).finally(() => setPending(false));
     return () => controller.abort();
   }, [companion]);
   const disconnect = useCallback(() => {
-    companion.credentials.clear();
-    setState("idle");
-  }, [companion]);
+    if (pendingRef.current) throw new Error("Companion is connecting");
+    setCredentials(null);
+  }, [setCredentials]);
+  const state = pending ? "pending" : credentials ? "connected" : "disconnected";
   return [state, connect, disconnect] as const;
 };
 

@@ -1,0 +1,39 @@
+@import './theme.css';
+
+:root {
+  --group-background: #0F2055;
+  --group-delimeter: #123673;
+  --group-value: #1F8FEB;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+
+  padding: 0 16px;
+  background-color: var(--group-background);
+  border-radius: 16px;
+}
+.group > .group-item:not(:first-child) {
+  border-top: 1px solid var(--group-delimeter);
+}
+
+.group > .group-item {
+  padding: 16px 0;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  justify-content: space-between;
+}
+.group > .group-item > .label {
+  font-size: 16px;
+  font-weight: 500;
+}
+.group > .group-item > .value {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--group-value);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
