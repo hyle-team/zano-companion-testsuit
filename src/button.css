@@ -1,0 +1,24 @@
+@import './theme.css';
+
+:root {
+  --button-foreground: var(--foreground);
+  --button-background: #1F8FEB;
+}
+
+button {
+  padding: 14px;
+  appearance: unset;
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+
+  background-color: var(--button-background);
+  border: unset;
+  border-radius: 12px;
+  justify-content: center;
+
+  color: var(--button-foreground);
+  font-family: system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+}

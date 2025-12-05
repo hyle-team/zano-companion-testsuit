@@ -1,0 +1,33 @@
+@import './theme.css';
+
+#screen {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+#header {
+  padding: 10px 20px;
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  background-color: var(--background-secondary);
+  justify-content: center;
+}
+
+#header > .logo {
+  width: 48px;
+  height: 48px;
+}
+#header > span {
+  font-weight: 500;
+  font-size: 32px;
+}
+
+#content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+}
