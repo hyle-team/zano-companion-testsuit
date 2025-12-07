@@ -22,8 +22,15 @@ export const App = () => {
           <Credentials />
           <WalletBalance />
           <WalletData />
-          <AliasDetails />
+          {/* IONIC_SWAP */}
+          {/* IONIC_SWAP_ACCEPT */}
+          {/* GET_IONIC_SWAP_PROPOSAL_INFO */}
+          {/* TRANSFER */}
           <RequestSign />
+          {/* GET_WHITELIST */}
+          {/* ASSETS_WHITELIST_ADD */}
+          <AliasDetails />
+          {/* CREATE_ALIAS */}
         </ZanoCompanionProvider>
       </div>
     </div>

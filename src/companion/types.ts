@@ -138,18 +138,18 @@ export type ZanoCompanionMethods = {
     currentAssetAmount: number;
   }): ZanoCompanionWrappedMethod<IONIC_SWAP_RESPONSE>;
   IONIC_SWAP_ACCEPT(params: { hex_raw_proposal: string }): ZanoCompanionWrappedMethod<IONIC_SWAP_ACCEPT_RESPONSE>;
+  GET_IONIC_SWAP_PROPOSAL_INFO(params: { hex_raw_proposal: string }): GET_IONIC_SWAP_PROPOSAL_INFO_RESPONSE;
   TRANSFER(
     params: { assetId: string; amount: string; comment?: string } & (
       | { destination: string; destinations?: never }
       | { destination?: never; destinations: { address: string; amount: string }[] }
     ),
   ): ZanoCompanionWrappedMethod<TRANSFER_RESPONSE>;
-  GET_ALIAS_DETAILS(params: { alias: string }): GET_ALIAS_DETAILS_RESPONSE;
   REQUEST_MESSAGE_SIGN(params: { message: string }): ZanoCompanionWrappedMethod<REQUEST_MESSAGE_SIGN_RESPONSE>;
-  GET_IONIC_SWAP_PROPOSAL_INFO(params: { hex_raw_proposal: string }): GET_IONIC_SWAP_PROPOSAL_INFO_RESPONSE;
   GET_WHITELIST(params?: Record<string, never>): GET_WHITELIST_RESPONSE;
-  CREATE_ALIAS(params: { alias: string; comment?: string }): ZanoCompanionWrappedMethod<CREATE_ALIAS_RESPONSE>;
   ASSETS_WHITELIST_ADD(params: { asset_id: string }): ZanoCompanionWrappedMethod<ASSETS_WHITELIST_ADD_RESPONSE>;
+  GET_ALIAS_DETAILS(params: { alias: string }): GET_ALIAS_DETAILS_RESPONSE;
+  CREATE_ALIAS(params: { alias: string; comment?: string }): ZanoCompanionWrappedMethod<CREATE_ALIAS_RESPONSE>;
 };
 export type ZanoCompanionMethodParams<Method extends keyof ZanoCompanionMethods> = Parameters<ZanoCompanionMethods[Method]>[0];
 export type ZanoCompanionMethodResult<Method extends keyof ZanoCompanionMethods> = ReturnType<ZanoCompanionMethods[Method]>;
