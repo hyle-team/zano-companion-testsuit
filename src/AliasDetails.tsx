@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import type { GET_ALIAS_DETAILS_RESPONSE } from "./companion";
 import { useZanoCompanion } from "./companion";
+import { Group } from "./Group";
 
 export const AliasDetails = () => {
   const companion = useZanoCompanion();
@@ -25,31 +26,15 @@ export const AliasDetails = () => {
         Call GET_ALIAS_DETAILS
       </button>
       {typeof details === "string" ? (
-        <div className="group">
-          <div className="group-item">
-            <span className="label">Failed to find alias:</span>
-            <span className="value">{details}</span>
-          </div>
-        </div>
+        <Group>
+          <Group.Item label="Failed to find alias:" value={details} />
+        </Group>
       ) : details ? (
-        <div className="group">
-          <div className="group-item">
-            <span className="label">Address:</span>
-            <span className="value">{details.address}</span>
-          </div>
-          {details.comment !== undefined ? (
-            <div className="group-item">
-              <span className="label">Comment:</span>
-              <span className="value">{details.comment}</span>
-            </div>
-          ) : null}
-          {details.tracking_key !== undefined ? (
-            <div className="group-item">
-              <span className="label">Tracking key:</span>
-              <span className="value">{details.tracking_key}</span>
-            </div>
-          ) : null}
-        </div>
+        <Group>
+          <Group.Item label="Address:" value={details.address} />
+          {details.comment !== undefined ? <Group.Item label="Comment:" value={details.comment} /> : null}
+          {details.tracking_key !== undefined ? <Group.Item label="Tracking key:" value={details.tracking_key} /> : null}
+        </Group>
       ) : null}
     </>
   );

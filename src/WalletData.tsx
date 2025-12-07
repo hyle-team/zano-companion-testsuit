@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState, useSyncExternalStore } from "react";
 import type { GET_WALLET_DATA_RESPONSE } from "./companion";
 import { useZanoCompanion } from "./companion";
+import { Group } from "./Group";
 
 const WalletDataWatcher = () => {
   const companion = useZanoCompanion();
@@ -19,18 +20,10 @@ const WalletDataWatcher = () => {
     () => snapshot.current,
   );
   return (
-    <div className="group">
-      {walletData?.alias ? (
-        <div className="group-item">
-          <span className="label">Alias:</span>
-          <span className="value">@{walletData.alias}</span>
-        </div>
-      ) : null}
-      <div className="group-item">
-        <span className="label">Balance:</span>
-        <span className="value">{walletData?.balance} ZANO</span>
-      </div>
-    </div>
+    <Group>
+      {walletData?.alias ? <Group.Item label="Alias:" value={`@${walletData.alias}`} /> : null}
+      <Group.Item label="Balance:" value={`${walletData?.balance} ZANO`} />
+    </Group>
   );
 };
 export const WalletData = () => {

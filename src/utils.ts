@@ -19,3 +19,7 @@ export class AssertError extends createErrorClass("AssertError", "value asserted
 export function assert(value: unknown, message?: string): asserts value {
   if (!value) throw new AssertError(message);
 }
+
+export function cn(...names: Array<string | false | null | undefined>) {
+  return names.filter(Boolean).join(" ");
+}
