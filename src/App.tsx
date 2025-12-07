@@ -1,3 +1,4 @@
+import { AliasDetails } from "./AliasDetails";
 import "./app.css";
 
 import { ZanoCompanionProvider } from "./companion";
@@ -20,6 +21,7 @@ export const App = () => {
           <Credentials />
           <WalletBalance />
           <WalletData />
+          <AliasDetails />
         </ZanoCompanionProvider>
       </div>
     </div>
