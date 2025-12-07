@@ -22,12 +22,12 @@ const WalletDataWatcher = () => {
     <div className="group">
       {walletData?.alias ? (
         <div className="group-item">
-          <span className="lable">Alias:</span>
+          <span className="label">Alias:</span>
           <span className="value">@{walletData.alias}</span>
         </div>
       ) : null}
       <div className="group-item">
-        <span className="lable">Balance:</span>
+        <span className="label">Balance:</span>
         <span className="value">{walletData?.balance} ZANO</span>
       </div>
     </div>
@@ -37,7 +37,7 @@ export const WalletData = () => {
   const [watching, setWatching] = useState(false);
   return (
     <>
-      <button onClick={() => setWatching((current) => !current)}>{watching ? "Ignore wallet data" : "Start watching wallet data"}</button>
+      <button onClick={() => setWatching((current) => !current)}>{watching ? "Ignore GET_WALLET_DATA" : "Start watching GET_WALLET_DATA"}</button>
       {watching ? <WalletDataWatcher /> : null}
     </>
   );

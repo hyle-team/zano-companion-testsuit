@@ -3,6 +3,7 @@ import "./app.css";
 import { ZanoCompanionProvider } from "./companion";
 import { Connector } from "./Connector";
 import { Credentials } from "./Credentials";
+import { WalletBalance } from "./WalletBalance";
 import { WalletData } from "./WalletData";
 import ZanoLogo from "./zano.svg";
 
@@ -17,6 +18,7 @@ export const App = () => {
         <ZanoCompanionProvider disableServerRequest verbose>
           <Connector />
           <Credentials />
+          <WalletBalance />
           <WalletData />
         </ZanoCompanionProvider>
       </div>
