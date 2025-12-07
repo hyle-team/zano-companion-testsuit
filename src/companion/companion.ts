@@ -1,15 +1,15 @@
 import { v4 as uuidv4 } from "uuid";
 import { ZanoCredentials, type ZanoCredentialsParams } from "./credentials";
-import type { ZanoCompanionMethods } from "./types";
+import type { ZanoCompanionMethodParams, ZanoCompanionMethodResult, ZanoCompanionMethods } from "./types";
 
 declare global {
   interface ZanoCompanionApi {
     request<Method extends keyof ZanoCompanionMethods>(
       method: Method,
-      ...params: keyof Parameters<ZanoCompanionMethods[Method]>[0] extends undefined
-        ? [params?: Parameters<ZanoCompanionMethods[Method]>[0], timeoutMs?: number | null]
-        : [params: Parameters<ZanoCompanionMethods[Method]>[0], timeoutMs?: number | null]
-    ): Promise<{ data: ReturnType<ZanoCompanionMethods[Method]> } | undefined>;
+      ...params: keyof ZanoCompanionMethodParams<Method> extends undefined
+        ? [params?: ZanoCompanionMethodParams<Method>, timeoutMs?: number | null]
+        : [params: ZanoCompanionMethodParams<Method>, timeoutMs?: number | null]
+    ): Promise<{ data: ZanoCompanionMethodResult<Method> } | undefined>;
   }
   var zano: ZanoCompanionApi | undefined;
 }
@@ -23,8 +23,6 @@ export type ZanoCompanionServerData = {
   isSavedData: boolean | undefined;
 };
 export type ZanoCompanionParams = ZanoCredentialsParams & {
-  verbose?: boolean;
-
   aliasRequired?: boolean;
   customNonce?: string;
   customServerPath?: string;
@@ -32,21 +30,24 @@ export type ZanoCompanionParams = ZanoCredentialsParams & {
 
   onConnectStart?: () => void;
   onConnectEnd?: (data: ZanoCompanionServerData & { token: string }) => void;
-  onConnectError?: (message: string) => void;
   onLocalConnectEnd?: (data: ZanoCompanionServerData) => void;
+
+  verbose?: boolean;
 };
 
 type AuthServerResponse = { success: true; data: { token: string } } | { success: false; error: string };
 
+type UnwrappedZanoCompanionMethodResult<Method extends keyof ZanoCompanionMethods> = Exclude<ZanoCompanionMethodResult<Method>, { error: unknown }>;
 export class ZanoCompanion {
-  private params: ZanoCompanionParams;
-  readonly zanoWallet: {
+  #params: ZanoCompanionParams;
+  readonly methods: {
     [Method in keyof ZanoCompanionMethods]: (
-      ...params: keyof Parameters<ZanoCompanionMethods[Method]>[0] extends undefined
-        ? [params?: Parameters<ZanoCompanionMethods[Method]>[0], timeoutMs?: number | null]
-        : [params: Parameters<ZanoCompanionMethods[Method]>[0], timeoutMs?: number | null]
-    ) => Promise<Exclude<ReturnType<ZanoCompanionMethods[Method]>, { error: unknown }>>;
+      ...params: keyof ZanoCompanionMethodParams<Method> extends undefined
+        ? [params?: ZanoCompanionMethodParams<Method>, timeoutMs?: number | null]
+        : [params: ZanoCompanionMethodParams<Method>, timeoutMs?: number | null]
+    ) => Promise<UnwrappedZanoCompanionMethodResult<Method>>;
   };
+  readonly credentials: ZanoCredentials;
 
   constructor(params: ZanoCompanionParams) {
     if (typeof window === "undefined") {
@@ -57,8 +58,14 @@ export class ZanoCompanion {
       console.error("ZanoWallet requires the ZanoWallet extension to be installed");
     }
 
-    this.params = Object.freeze(params);
-    this.zanoWallet = new Proxy(
+    this.#params = Object.freeze(params);
+    const wrappers = {
+      GET_WALLET_DATA: (result) => {
+        const credentials = this.credentials.get();
+        if (credentials && result.address !== credentials?.address) this.credentials.clear();
+      },
+    } as { [Method in keyof ZanoCompanionMethods]?: (result: UnwrappedZanoCompanionMethodResult<Method>) => void };
+    this.methods = new Proxy(
       {},
       {
         get(cache, prop) {
@@ -75,6 +82,7 @@ export class ZanoCompanion {
               if (typeof response.data.error === "string") throw new Error(response.data.error);
               throw response.data.error;
             }
+            wrappers[method]?.(response.data as never);
             return response.data;
           };
           // @ts-expect-error - untyped
@@ -83,44 +91,35 @@ export class ZanoCompanion {
         },
       },
     ) as never;
+
     this.credentials = new ZanoCredentials(params);
   }
 
-  private handleError({ message }: { message: string }) {
-    if (this.params.onConnectError) {
-      this.params.onConnectError(message);
-    } else {
-      console.error(message);
-    }
-  }
-
-  readonly credentials: ZanoCredentials;
-
   async connect(signal?: AbortSignal) {
     if (signal?.aborted) throw signal.reason;
-    this.params.onConnectStart?.();
+    this.#params.onConnectStart?.();
 
-    if (this.params.verbose) console.log("getting walletData");
-    const walletData = await this.zanoWallet.GET_WALLET_DATA().catch(() => undefined);
+    if (this.#params.verbose) console.log("getting walletData");
+    const walletData = await this.methods.GET_WALLET_DATA().catch(() => undefined);
     if (signal?.aborted) throw signal.reason;
-    if (!walletData?.address) return this.handleError({ message: "Companion is offline" });
-    if (this.params.aliasRequired && !walletData.alias) return this.handleError({ message: "Alias not found" });
-    if (this.params.verbose) console.log("walletData:", walletData);
+    if (!walletData?.address) throw new Error("Companion is offline");
+    if (this.#params.aliasRequired && !walletData.alias) throw new Error("Alias not found");
+    if (this.#params.verbose) console.log("walletData:", walletData);
 
     let nonce = "";
     let signature = "";
     let publicKey = "";
-    const stored = this.credentials.get();
-    if (stored && this.params.verbose) console.log("stored wallet:", stored);
+    const stored = this.credentials.restore(walletData.address);
+    if (stored && this.#params.verbose) console.log("stored wallet:", stored);
     if (stored?.address === walletData.address) {
       ({ nonce, signature, publicKey } = stored);
     } else {
-      const generatedNonce = this.params.customNonce ?? uuidv4();
-      if (this.params.verbose) console.log("getting signature:", generatedNonce);
-      const signResult = await this.zanoWallet.REQUEST_MESSAGE_SIGN({ message: generatedNonce }).catch(() => undefined);
-      if (this.params.verbose) console.log("signature:", signResult);
+      const generatedNonce = this.#params.customNonce ?? uuidv4();
+      if (this.#params.verbose) console.log("getting signature:", generatedNonce);
+      const signResult = await this.methods.REQUEST_MESSAGE_SIGN({ message: generatedNonce }).catch(() => undefined);
+      if (this.#params.verbose) console.log("signature:", signResult);
       if (signal?.aborted) throw signal.reason;
-      if (!signResult?.result) return this.handleError({ message: "Failed to sign message" });
+      if (!signResult?.result) throw new Error("Failed to sign message");
 
       nonce = generatedNonce;
       signature = signResult.result.sig;
@@ -135,12 +134,12 @@ export class ZanoCompanion {
       message: nonce,
       isSavedData: !!stored,
     };
-    if (this.params.verbose) console.log("connected:", serverData);
-    this.params.onLocalConnectEnd?.(serverData);
+    if (this.#params.verbose) console.log("connected:", serverData);
+    this.#params.onLocalConnectEnd?.(serverData);
 
-    if (!this.params.disableServerRequest) {
-      if (this.params.verbose) console.log("authenticating");
-      const result = await fetch(this.params.customServerPath ?? "/api/auth", {
+    if (!this.#params.disableServerRequest) {
+      if (this.#params.verbose) console.log("authenticating");
+      const result = await fetch(this.#params.customServerPath ?? "/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ data: serverData }),
@@ -149,14 +148,12 @@ export class ZanoCompanion {
         .then((response) => response.json() as Promise<AuthServerResponse>)
         .catch((error) => ({ success: false, error: error instanceof Error ? error.message : String(error) }) as AuthServerResponse);
       if (signal?.aborted) throw signal.reason;
-      if (this.params.verbose) console.log("authentication result:", result);
-      if (!result) return this.handleError({ message: "Unexpected server response" });
-      if (!result.success) return this.handleError({ message: result.error });
-      if (this.params.verbose) console.log("authenticated:", result.data.token);
-      this.params.onConnectEnd?.({ ...serverData, token: result.data.token });
+      if (this.#params.verbose) console.log("authentication result:", result);
+      if (!result) throw new Error("Unexpected server response");
+      if (!result.success) throw new Error(result.error);
+      if (this.#params.verbose) console.log("authenticated:", result.data.token);
+      this.#params.onConnectEnd?.({ ...serverData, token: result.data.token });
     }
-    if (!stored) this.credentials.set({ publicKey, signature, nonce, address: walletData.address });
-
-    return true;
+    this.credentials.set({ publicKey, signature, nonce, address: walletData.address });
   }
 }

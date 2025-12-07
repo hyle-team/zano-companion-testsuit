@@ -1,7 +1,7 @@
 import { useZanoCompanionCredentials } from "./companion";
 
 export const Credentials = () => {
-  const [credentials] = useZanoCompanionCredentials();
+  const credentials = useZanoCompanionCredentials();
   if (!credentials) return null;
   return (
     <div className="group">

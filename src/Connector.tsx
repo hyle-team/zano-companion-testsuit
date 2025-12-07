@@ -1,10 +1,10 @@
 import { useZanoCompanionConnect } from "./companion";
 
 export const Connector = () => {
-  const [state, connect, disconnect] = useZanoCompanionConnect();
+  const [status, connect, disconnect] = useZanoCompanionConnect();
   return (
-    <button onClick={state === "disconnected" ? connect : state === "connected" ? disconnect : undefined} disabled={state === "pending"}>
-      connection state: {state}
+    <button onClick={status === "disconnected" ? connect : status === "connected" ? disconnect : undefined} disabled={status === "pending"}>
+      connection state: {status}
     </button>
   );
 };

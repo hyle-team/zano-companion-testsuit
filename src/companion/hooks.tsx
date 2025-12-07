@@ -1,31 +1,12 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-  useSyncExternalStore,
-  type ReactNode,
-  type SetStateAction,
-} from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { assert } from "../utils";
 import { ZanoCompanion, type ZanoCompanionParams } from "./companion";
-import type { IZanoCredentials } from "./credentials";
 
-export const useZanoCompanionInstance = ({
-  onConnectStart,
-  onConnectEnd,
-  onConnectError,
-  onLocalConnectEnd,
-  ...params
-}: ZanoCompanionParams = {}) => {
+export const useZanoCompanionInstance = ({ onConnectStart, onConnectEnd, onLocalConnectEnd, ...params }: ZanoCompanionParams = {}) => {
   const onConnectStartRef = useRef(onConnectStart);
   onConnectStartRef.current = onConnectStart;
   const onConnectEndRef = useRef(onConnectEnd);
   onConnectEndRef.current = onConnectEnd;
-  const onConnectErrorRef = useRef(onConnectError);
-  onConnectErrorRef.current = onConnectError;
   const onLocalConnectEndRef = useRef(onLocalConnectEnd);
   onLocalConnectEndRef.current = onLocalConnectEnd;
 
@@ -35,7 +16,6 @@ export const useZanoCompanionInstance = ({
       ...params,
       onConnectStart: (...params) => onConnectStartRef.current?.(...params),
       onConnectEnd: (...params) => onConnectEndRef.current?.(...params),
-      onConnectError: (...params) => onConnectErrorRef.current?.(...params),
       onLocalConnectEnd: (...params) => onLocalConnectEndRef.current?.(...params),
     });
   }
@@ -61,41 +41,49 @@ export const useZanoCompanionCredentials = (companion?: ZanoCompanion) => {
     useCallback((listener) => companion.credentials.addListener(listener), [companion.credentials]),
     () => companion.credentials.get(),
   );
-  const setCredentials = useCallback(
-    (action: SetStateAction<IZanoCredentials | null>) => {
-      let next: IZanoCredentials | null;
-      if (typeof action === "function") next = action(companion.credentials.get());
-      else next = action;
-      companion.credentials.set(next);
-    },
-    [companion.credentials],
-  );
-  return [credentials, setCredentials] as const;
+  return credentials;
 };
 
 export const useZanoCompanionConnect = (companion?: ZanoCompanion) => {
   companion = useZanoCompanion(companion);
-  const [credentials, setCredentials] = useZanoCompanionCredentials(companion);
-  const [pending, setPending] = useState(false);
-  const pendingRef = useRef(pending);
-  pendingRef.current = pending;
+  const [status, setStatus] = useState<"disconnected" | "pending" | "connected">("disconnected");
+  const statusRef = useRef(status);
+  statusRef.current = status;
+
   const connect = useCallback(() => {
-    if (pendingRef.current) throw new Error("Companion is connecting");
+    if (statusRef.current === "pending") throw new Error("Companion is connecting");
     const controller = new AbortController();
-    setPending(true);
-    void companion.connect(controller.signal).finally(() => setPending(false));
+    setStatus("pending");
+    void companion.connect(controller.signal).then(
+      () => setStatus("connected"),
+      () => {
+        setStatus("disconnected");
+        companion.credentials.clear();
+      },
+    );
     return () => controller.abort();
   }, [companion]);
   const disconnect = useCallback(() => {
-    if (pendingRef.current) throw new Error("Companion is connecting");
-    setCredentials(null);
-  }, [setCredentials]);
-  const state = pending ? "pending" : credentials ? "connected" : "disconnected";
-  return [state, connect, disconnect] as const;
+    if (statusRef.current === "pending") throw new Error("Companion is connecting");
+    setStatus("disconnected");
+    companion.credentials.clear();
+  }, [companion.credentials]);
+  useEffect(
+    () =>
+      companion.credentials.addListener((next) => {
+        if (!next && statusRef.current === "connected") {
+          setStatus("disconnected");
+        }
+      }),
+    [companion.credentials],
+  );
+
+  return [status, connect, disconnect] as const;
 };
 
 export const useZanoCompanionConnectEffect = (companion?: ZanoCompanion) => {
   const [state, connect, disconnect] = useZanoCompanionConnect(companion);
+  const credentials = useZanoCompanionCredentials(companion);
   useEffect(() => {
     const abort = connect();
     return () => {
@@ -103,5 +91,5 @@ export const useZanoCompanionConnectEffect = (companion?: ZanoCompanion) => {
       disconnect();
     };
   }, [connect, disconnect]);
-  return state;
+  return [state, credentials] as const;
 };

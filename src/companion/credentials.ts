@@ -11,14 +11,18 @@ export type ZanoCredentialsParams = {
 };
 
 export class ZanoCredentials {
-  private static readonly DEFAULT_LOCAL_STORAGE_KEY = "wallet";
-  private localStorageKey: string | false;
+  static readonly #DEFAULT_LOCAL_STORAGE_KEY = "wallet";
+  #localStorageKey: string | false;
 
   constructor({ useLocalStorage = true, customLocalStorageKey }: ZanoCredentialsParams = {}) {
-    this.localStorageKey = useLocalStorage ? (customLocalStorageKey ?? ZanoCredentials.DEFAULT_LOCAL_STORAGE_KEY) : false;
-    this.stored = (() => {
-      if (!this.localStorageKey) return null;
-      const json = localStorage.getItem(this.localStorageKey);
+    this.#localStorageKey = useLocalStorage ? (customLocalStorageKey ?? ZanoCredentials.#DEFAULT_LOCAL_STORAGE_KEY) : false;
+  }
+
+  #stored: IZanoCredentials | null = null;
+  restore(address?: string) {
+    let next = (() => {
+      if (!this.#localStorageKey) return null;
+      const json = localStorage.getItem(this.#localStorageKey);
       if (json === null) return null;
       try {
         const parsed = JSON.parse(json) as IZanoCredentials;
@@ -27,22 +31,26 @@ export class ZanoCredentials {
         return null;
       }
     })();
+    if (address && next && next.address !== address) next = null;
+    if (next !== this.#stored) {
+      this.#stored = next;
+      void this.emit(next);
+    }
+    return next;
   }
-
-  private stored: IZanoCredentials | null;
   get() {
-    return this.stored;
+    return this.#stored;
   }
   clear() {
-    this.stored = null;
-    if (this.localStorageKey) localStorage.removeItem(this.localStorageKey);
+    this.#stored = null;
+    if (this.#localStorageKey) localStorage.removeItem(this.#localStorageKey);
     void this.emit(null);
   }
   set(credentials: IZanoCredentials | null) {
-    this.stored = credentials;
-    if (this.localStorageKey) {
-      if (credentials) localStorage.setItem(this.localStorageKey, JSON.stringify(credentials));
-      else localStorage.removeItem(this.localStorageKey);
+    this.#stored = credentials;
+    if (this.#localStorageKey) {
+      if (credentials) localStorage.setItem(this.#localStorageKey, JSON.stringify(credentials));
+      else localStorage.removeItem(this.#localStorageKey);
     }
     void this.emit(credentials);
   }
@@ -54,7 +62,9 @@ export class ZanoCredentials {
   }
   addListener(listener: (credentials: IZanoCredentials | null) => void) {
     this.listeners.add(listener);
-    return () => this.listeners.delete(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
   }
   removeListener(listener: (credentials: IZanoCredentials | null) => void) {
     this.listeners.delete(listener);
