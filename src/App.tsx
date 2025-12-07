@@ -11,7 +11,7 @@ export const App = () => {
     <div id="screen">
       <div id="header">
         <img src={ZanoLogo} className="logo" alt="Zano logo" />
-        <span>Zano Companion Test Suits</span>
+        <span>ZanoCompanion Test Suits</span>
       </div>
       <div id="content">
         <ZanoCompanionProvider disableServerRequest verbose>
