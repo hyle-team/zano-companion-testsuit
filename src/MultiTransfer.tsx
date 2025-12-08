@@ -17,8 +17,7 @@ export const MultiTransfer = () => {
       if (amount.isNaN()) return;
       destinations.push({ address: destination, assetId, amount: amount.toFixed(12) });
     } while (confirm("Do you want to add more receipient?"));
-    const comment = prompt("Comment:");
-    if (!comment) return;
+    const comment = prompt("Comment:") ?? undefined;
     try {
       const { result } = await companion.methods.TRANSFER({ destinations, comment });
       setResponse(result);
@@ -40,7 +39,11 @@ export const MultiTransfer = () => {
           <Group.Item label="Failed to transfer:" value={response} />
         </Group>
       ) : response ? (
-        <Group></Group>
+        <Group>
+          <Group.Item label="Hash:" value={response.tx_hash} />
+          <Group.Item label="Size:" value={String(response.tx_size)} />
+          <Group.Item label="Unsigned hex:" value={response.tx_unsigned_hex} />
+        </Group>
       ) : null}
     </>
   );

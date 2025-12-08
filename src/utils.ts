@@ -29,3 +29,8 @@ export type ExclusiveUnion<T extends object, U extends object> = T extends unkno
     ? (T & { [K in Exclude<keyof U, keyof T>]?: never }) | (U & { [K in Exclude<keyof T, keyof U>]?: never })
     : never
   : never;
+
+export const particlesToValue = (amount: BigNumber.Value, decimal_point: number) => {
+  const multiplier = BigNumber(10).pow(decimal_point);
+  return BigNumber(amount).div(multiplier).toFixed(decimal_point);
+};

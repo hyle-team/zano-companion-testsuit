@@ -1,8 +1,9 @@
-import { AliasDetails } from "./AliasDetails";
 import "./app.css";
 
+import { AliasDetails } from "./AliasDetails";
 import { ZanoCompanionProvider } from "./companion";
 import { Connector } from "./Connector";
+import { CreateAlias } from "./CreateAlias";
 import { Credentials } from "./Credentials";
 import { MultiTransfer } from "./MultiTransfer";
 import { RequestSign } from "./RequestSign";
@@ -25,17 +26,15 @@ export const App = () => {
           <Credentials />
           <WalletBalance />
           <WalletData />
-          <Whitelist />
           {/* IONIC_SWAP */}
           {/* IONIC_SWAP_ACCEPT */}
           {/* GET_IONIC_SWAP_PROPOSAL_INFO */}
           <Transfer />
           <MultiTransfer />
           <RequestSign />
-          {/* GET_WHITELIST */}
-          {/* ASSETS_WHITELIST_ADD */}
+          <Whitelist />
           <AliasDetails />
-          {/* CREATE_ALIAS */}
+          <CreateAlias />
         </ZanoCompanionProvider>
       </div>
     </div>

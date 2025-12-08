@@ -1,8 +1,8 @@
-import BigNumber from "bignumber.js";
 import { useCallback, useRef, useState, useSyncExternalStore } from "react";
 import type { GET_WALLET_BALANCE_RESPONSE } from "./companion";
 import { useZanoCompanion } from "./companion";
 import { Group } from "./Group";
+import { particlesToValue } from "./utils";
 
 const WalletBalanceWatcher = () => {
   const companion = useZanoCompanion();
@@ -21,10 +21,7 @@ const WalletBalanceWatcher = () => {
     ),
     () => snapshot.current,
   );
-  const particlesToValue = (amount: BigNumber.Value, decimal_point: number) => {
-    const multiplier = BigNumber(10).pow(decimal_point);
-    return BigNumber(amount).div(multiplier).toFixed(decimal_point);
-  };
+
   return (
     <>
       <Group>
