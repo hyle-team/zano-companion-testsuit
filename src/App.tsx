@@ -9,6 +9,7 @@ import { RequestSign } from "./RequestSign";
 import { Transfer } from "./Transfer";
 import { WalletBalance } from "./WalletBalance";
 import { WalletData } from "./WalletData";
+import { Whitelist } from "./Whitelist";
 import ZanoLogo from "./zano.svg";
 
 export const App = () => {
@@ -24,10 +25,10 @@ export const App = () => {
           <Credentials />
           <WalletBalance />
           <WalletData />
+          <Whitelist />
           {/* IONIC_SWAP */}
           {/* IONIC_SWAP_ACCEPT */}
           {/* GET_IONIC_SWAP_PROPOSAL_INFO */}
-          {/* TRANSFER */}
           <Transfer />
           <MultiTransfer />
           <RequestSign />

@@ -12,7 +12,7 @@ const WalletDataWatcher = () => {
         const interval = setInterval(async () => {
           snapshot.current = await companion.methods.GET_WALLET_DATA();
           listener();
-        }, 1000);
+        }, 3000);
         return () => clearInterval(interval);
       },
       [companion.methods],

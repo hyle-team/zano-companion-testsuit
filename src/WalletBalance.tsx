@@ -14,7 +14,7 @@ const WalletBalanceWatcher = () => {
           const { result } = await companion.methods.GET_WALLET_BALANCE();
           snapshot.current = result;
           listener();
-        }, 1000);
+        }, 3000);
         return () => clearInterval(interval);
       },
       [companion.methods],

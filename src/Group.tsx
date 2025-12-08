@@ -1,8 +1,8 @@
-import type { ComponentProps } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import { cn } from "./utils";
 
 export const Group = ({ className, ...props }: ComponentProps<"div">) => <div {...props} className={cn("group", className)} />;
-const GroupItem = ({ label, value, className, onClick, ...props }: ComponentProps<"div"> & { label: string; value: string }) => {
+const GroupItem = ({ label, value, className, onClick, ...props }: ComponentProps<"div"> & { label: ReactNode; value: string }) => {
   return (
     <div
       {...props}
