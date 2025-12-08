@@ -18,4 +18,9 @@ jobs:
           corepack enable
           corepack prepare yarn@stable --activate
       - run: pnpm install --frozen-lockfile
-      - run: pnpm run deploy
+      - run: pnpm run predeploy
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
