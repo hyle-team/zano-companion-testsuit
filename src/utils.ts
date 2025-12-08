@@ -23,3 +23,9 @@ export function assert(value: unknown, message?: string): asserts value {
 export function cn(...names: Array<string | false | null | undefined>) {
   return names.filter(Boolean).join(" ");
 }
+
+export type ExclusiveUnion<T extends object, U extends object> = T extends unknown
+  ? U extends unknown
+    ? (T & { [K in Exclude<keyof U, keyof T>]?: never }) | (U & { [K in Exclude<keyof T, keyof U>]?: never })
+    : never
+  : never;

@@ -1,3 +1,5 @@
+import type { ExclusiveUnion } from "../utils";
+
 export type asset_descriptor_base = {
   /** Maximum possible supply for a given asset, cannot be changed after deployment. */
   total_max_supply: number;
@@ -140,10 +142,10 @@ export type ZanoCompanionMethods = {
   IONIC_SWAP_ACCEPT(params: { hex_raw_proposal: string }): ZanoCompanionWrappedMethod<IONIC_SWAP_ACCEPT_RESPONSE>;
   GET_IONIC_SWAP_PROPOSAL_INFO(params: { hex_raw_proposal: string }): GET_IONIC_SWAP_PROPOSAL_INFO_RESPONSE;
   TRANSFER(
-    params: { assetId: string; amount: string; comment?: string } & (
-      | { destination: string; destinations?: never }
-      | { destination?: never; destinations: { address: string; amount: string }[] }
-    ),
+    params: ExclusiveUnion<
+      { assetId: string; destination: string; amount: string },
+      { assetId?: string; destinations: { address: string; amount: string; assetId?: string }[] }
+    > & { comment?: string },
   ): ZanoCompanionWrappedMethod<TRANSFER_RESPONSE>;
   REQUEST_MESSAGE_SIGN(params: { message: string }): ZanoCompanionWrappedMethod<REQUEST_MESSAGE_SIGN_RESPONSE>;
   GET_WHITELIST(params?: Record<string, never>): GET_WHITELIST_RESPONSE;

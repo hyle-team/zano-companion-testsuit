@@ -5,34 +5,34 @@ import { Group } from "./Group";
 
 export const RequestSign = () => {
   const companion = useZanoCompanion();
-  const [details, setDetails] = useState<REQUEST_MESSAGE_SIGN_RESPONSE | string | null>(null);
-  const fetchDetails = useCallback(async () => {
+  const [response, setResponse] = useState<REQUEST_MESSAGE_SIGN_RESPONSE | string | null>(null);
+  const call = useCallback(async () => {
     const message = prompt("What message are you trying to sign?");
     if (!message) return;
     try {
       const { result } = await companion.methods.REQUEST_MESSAGE_SIGN({ message });
-      setDetails(result);
+      setResponse(result);
     } catch (reason) {
-      setDetails(reason instanceof Error ? reason.message : String(reason));
+      setResponse(reason instanceof Error ? reason.message : String(reason));
     }
   }, [companion.methods]);
   return (
     <>
       <button
         onClick={() => {
-          void fetchDetails();
+          void call();
         }}
       >
         Call REQUEST_MESSAGE_SIGN
       </button>
-      {typeof details === "string" ? (
+      {typeof response === "string" ? (
         <Group>
-          <Group.Item label="Failed to sign:" value={details} />
+          <Group.Item label="Failed to sign:" value={response} />
         </Group>
-      ) : details ? (
+      ) : response ? (
         <Group>
-          <Group.Item label="Signature:" value={details.sig} />
-          <Group.Item label="Key:" value={details.pkey} />
+          <Group.Item label="Signature:" value={response.sig} />
+          <Group.Item label="Key:" value={response.pkey} />
         </Group>
       ) : null}
     </>

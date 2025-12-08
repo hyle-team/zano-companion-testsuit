@@ -4,7 +4,9 @@ import "./app.css";
 import { ZanoCompanionProvider } from "./companion";
 import { Connector } from "./Connector";
 import { Credentials } from "./Credentials";
+import { MultiTransfer } from "./MultiTransfer";
 import { RequestSign } from "./RequestSign";
+import { Transfer } from "./Transfer";
 import { WalletBalance } from "./WalletBalance";
 import { WalletData } from "./WalletData";
 import ZanoLogo from "./zano.svg";
@@ -26,6 +28,8 @@ export const App = () => {
           {/* IONIC_SWAP_ACCEPT */}
           {/* GET_IONIC_SWAP_PROPOSAL_INFO */}
           {/* TRANSFER */}
+          <Transfer />
+          <MultiTransfer />
           <RequestSign />
           {/* GET_WHITELIST */}
           {/* ASSETS_WHITELIST_ADD */}
