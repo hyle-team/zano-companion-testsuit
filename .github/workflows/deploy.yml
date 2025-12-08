@@ -1,0 +1,17 @@
+name: "Deploy ZanoCompanion Test Suit to Github Pages"
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run deploy
