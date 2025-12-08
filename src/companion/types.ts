@@ -135,9 +135,9 @@ export type ZanoCompanionMethods = {
   IONIC_SWAP(params: {
     destinationAddress: string;
     destinationAssetID: string;
-    destinationAssetAmount: number;
+    destinationAssetAmount: number | string;
     currentAssetID: string;
-    currentAssetAmount: number;
+    currentAssetAmount: number | string;
   }): ZanoCompanionWrappedMethod<IONIC_SWAP_RESPONSE>;
   IONIC_SWAP_ACCEPT(params: { hex_raw_proposal: string }): ZanoCompanionWrappedMethod<IONIC_SWAP_ACCEPT_RESPONSE>;
   GET_IONIC_SWAP_PROPOSAL_INFO(params: { hex_raw_proposal: string }): GET_IONIC_SWAP_PROPOSAL_INFO_RESPONSE;

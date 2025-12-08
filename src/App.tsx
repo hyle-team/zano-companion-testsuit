@@ -5,6 +5,9 @@ import { ZanoCompanionProvider } from "./companion";
 import { Connector } from "./Connector";
 import { CreateAlias } from "./CreateAlias";
 import { Credentials } from "./Credentials";
+import { IonicSwap } from "./IonicSwap";
+import { IonicSwapAccept } from "./IonicSwapAccept";
+import { IonicSwapInfo } from "./IonicSwapInfo";
 import { MultiTransfer } from "./MultiTransfer";
 import { RequestSign } from "./RequestSign";
 import { Transfer } from "./Transfer";
@@ -26,9 +29,9 @@ export const App = () => {
           <Credentials />
           <WalletBalance />
           <WalletData />
-          {/* IONIC_SWAP */}
-          {/* IONIC_SWAP_ACCEPT */}
-          {/* GET_IONIC_SWAP_PROPOSAL_INFO */}
+          <IonicSwap />
+          <IonicSwapAccept />
+          <IonicSwapInfo />
           <Transfer />
           <MultiTransfer />
           <RequestSign />
