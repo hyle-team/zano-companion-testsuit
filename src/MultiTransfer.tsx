@@ -1,3 +1,4 @@
+import { BigNumber } from "bignumber.js";
 import { useCallback, useState } from "react";
 import type { TRANSFER_RESPONSE } from "./companion";
 import { useZanoCompanion } from "./companion";

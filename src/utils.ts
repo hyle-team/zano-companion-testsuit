@@ -1,3 +1,5 @@
+import type BigNumber from "bignumber.js";
+
 export interface ISpecificError extends Error {
   readonly [Symbol.toStringTag]: string;
   readonly name: string;
