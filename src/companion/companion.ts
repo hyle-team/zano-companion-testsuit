@@ -65,10 +65,11 @@ export class ZanoCompanion {
         if (credentials && result.address !== credentials?.address) this.credentials.clear();
       },
     } as { [Method in keyof ZanoCompanionMethods]?: (result: UnwrappedZanoCompanionMethodResult<Method>) => void };
+
     this.methods = new Proxy(
       {},
       {
-        get(cache, prop) {
+        get: (cache, prop) => {
           const method = prop as keyof ZanoCompanionMethods;
           // @ts-expect-error - untyped
           // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -76,7 +77,12 @@ export class ZanoCompanion {
           // @ts-expect-error - untyped
           cache[method] = async (params: Parameters<ZanoCompanionMethods[typeof method]>[0], timeoutMs?: number | null) => {
             if (!window.zano) throw new Error("ZanoWallet requires the ZanoWallet extension to be installed");
-            const response = await window.zano.request(method, params, timeoutMs);
+            if (this.#params.verbose) console.info(`> ${method}(${JSON.stringify(params)})`);
+            const response = await window.zano.request(method, params, timeoutMs).catch((reason) => {
+              if (this.#params.verbose) console.info(`> ${method} throws ${JSON.stringify(reason)}`);
+              throw reason;
+            });
+            if (this.#params.verbose) console.info(`> ${method} -> ${JSON.stringify(response)}`);
             if (!response) throw new Error("Request failed");
             if (typeof response.data === "object" && "error" in response.data && response.data.error) {
               if (typeof response.data.error === "string") throw new Error(response.data.error);
