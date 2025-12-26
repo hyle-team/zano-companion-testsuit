@@ -5,6 +5,7 @@ import { ZanoCompanionProvider } from "./companion";
 import { Connector } from "./Connector";
 import { CreateAlias } from "./CreateAlias";
 import { Credentials } from "./Credentials";
+import { DeepLinkTransferLegacy } from "./DeepLinkTransferLegacy";
 import { IonicSwap } from "./IonicSwap";
 import { IonicSwapAccept } from "./IonicSwapAccept";
 import { IonicSwapInfo } from "./IonicSwapInfo";
@@ -38,6 +39,7 @@ export const App = () => {
           <Whitelist />
           <AliasDetails />
           <CreateAlias />
+          <DeepLinkTransferLegacy />
         </ZanoCompanionProvider>
       </div>
     </div>
