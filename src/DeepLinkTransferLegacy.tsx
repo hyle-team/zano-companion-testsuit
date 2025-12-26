@@ -1,3 +1,4 @@
+import { BigNumber } from "bignumber.js";
 import { useCallback, useState } from "react";
 
 export const DeepLinkTransferLegacy = () => {
