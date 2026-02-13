@@ -1,7 +1,7 @@
 import { BigNumber } from "bignumber.js";
 import { useCallback, useState } from "react";
 
-export const DeepLinkTransferLegacy = () => {
+export const DeepLinkTransfer = () => {
   const [link, setLink] = useState<string | null>(null);
   const call = useCallback(() => {
     const address = prompt("Whom do you send it?");
@@ -10,7 +10,7 @@ export const DeepLinkTransferLegacy = () => {
     const amount = BigNumber(prompt("How many?") ?? NaN);
     const comment = prompt("Comment:") ?? undefined;
     setLink(
-      `zano:action=send&address=${address}${assetId ? `&asset_id=${assetId}` : ""}${amount.isNaN() ? "" : `&amount=${amount.toString(10)}`}${comment ? `&comment=${comment}` : ""}`,
+      `zano://transfer/?address=${address}${assetId ? `&asset_id=${assetId}` : ""}${amount.isNaN() ? "" : `&amount=${amount.toString(10)}`}${comment ? `&comment=${comment}` : ""}`,
     );
   }, []);
   return (
@@ -20,11 +20,11 @@ export const DeepLinkTransferLegacy = () => {
           void call();
         }}
       >
-        Create Legacy Transfer DeepLink
+        Create Transfer DeepLink
       </button>
       {link ? (
         <a href={link}>
-          <button>Legacy Transfer DeepLink: {link}</button>
+          <button>Transfer DeepLink: {link}</button>
         </a>
       ) : null}
     </>

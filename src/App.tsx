@@ -5,6 +5,7 @@ import { ZanoCompanionProvider } from "./companion";
 import { Connector } from "./Connector";
 import { CreateAlias } from "./CreateAlias";
 import { Credentials } from "./Credentials";
+import { DeepLinkTransfer } from "./DeepLinkTransfer";
 import { DeepLinkTransferLegacy } from "./DeepLinkTransferLegacy";
 import { IonicSwap } from "./IonicSwap";
 import { IonicSwapAccept } from "./IonicSwapAccept";
@@ -26,20 +27,24 @@ export const App = () => {
       </div>
       <div id="content">
         <ZanoCompanionProvider disableServerRequest verbose>
+          <div>Links</div>
+          <DeepLinkTransfer />
+          <DeepLinkTransferLegacy />
+          <div>Companion status</div>
           <Connector />
           <Credentials />
           <WalletBalance />
           <WalletData />
+          <Whitelist />
+          <div>Companion methods</div>
           <IonicSwap />
           <IonicSwapAccept />
           <IonicSwapInfo />
           <Transfer />
           <MultiTransfer />
           <RequestSign />
-          <Whitelist />
           <AliasDetails />
           <CreateAlias />
-          <DeepLinkTransferLegacy />
         </ZanoCompanionProvider>
       </div>
     </div>

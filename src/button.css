@@ -1,8 +1,8 @@
-@import './theme.css';
+@import "./theme.css";
 
 :root {
   --button-foreground: var(--foreground);
-  --button-background: #1F8FEB;
+  --button-background: #1f8feb;
 }
 
 button {
@@ -21,4 +21,11 @@ button {
   font-family: system-ui, sans-serif;
   font-size: 16px;
   font-weight: 600;
+}
+
+a:has(> button) {
+  display: flex;
+}
+a > button {
+  flex: 1;
 }
