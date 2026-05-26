@@ -28,6 +28,7 @@ const WalletBalanceWatcher = () => {
         <Group.Item label="Balance:" value={`${particlesToValue(response?.balance ?? 0, 12)} ZANO`} />
         <Group.Item label="Unlocked Balance:" value={`${particlesToValue(response?.unlocked_balance ?? 0, 12)} ZANO`} />
       </Group>
+      <div>Balances</div>
       <Group>
         {response?.balances.map((balance) => (
           <Group.Item
