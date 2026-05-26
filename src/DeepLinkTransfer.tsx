@@ -3,21 +3,23 @@ import { useCallback, useState } from "react";
 
 export const DeepLinkTransfer = () => {
   const [link, setLink] = useState<string | null>(null);
-  const call = useCallback(() => {
+  const call = useCallback((useMobileFormat: boolean = false) => {
     const address = prompt("Whom do you send it?");
     if (!address) return;
     const assetId = prompt("What are you sending?");
     const amount = BigNumber(prompt("How many?") ?? NaN);
     const comment = prompt("Comment:") ?? undefined;
     setLink(
-      `zano://transfer/?address=${address}${assetId ? `&asset_id=${assetId}` : ""}${amount.isNaN() ? "" : `&amount=${amount.toString(10)}`}${comment ? `&comment=${comment}` : ""}`,
+      useMobileFormat
+        ? `zano://transfer/?address=${address}${assetId ? `&asset_id=${assetId}` : ""}${amount.isNaN() ? "" : `&amount=${amount.toString(10)}`}${comment ? `&comment=${comment}` : ""}`
+        : `zano:action=send&address=${address}${assetId ? `&asset_id=${assetId}` : ""}${amount.isNaN() ? "" : `&amount=${amount.toString(10)}`}${comment ? `&comment=${comment}` : ""}`,
     );
   }, []);
   return (
     <>
       <button
-        onClick={() => {
-          void call();
+        onClick={(event) => {
+          void call(event.altKey);
         }}
       >
         Create Transfer DeepLink

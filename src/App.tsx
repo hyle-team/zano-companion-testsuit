@@ -5,8 +5,9 @@ import { ZanoCompanionProvider } from "./companion";
 import { Connector } from "./Connector";
 import { CreateAlias } from "./CreateAlias";
 import { Credentials } from "./Credentials";
+import { DeepLinkCompanion } from "./DeepLinkCompanion";
 import { DeepLinkTransfer } from "./DeepLinkTransfer";
-import { DeepLinkTransferLegacy } from "./DeepLinkTransferLegacy";
+import { DeepLinkWallet } from "./DeepLinkWallet";
 import { IonicSwap } from "./IonicSwap";
 import { IonicSwapAccept } from "./IonicSwapAccept";
 import { IonicSwapInfo } from "./IonicSwapInfo";
@@ -29,7 +30,8 @@ export const App = () => {
         <ZanoCompanionProvider disableServerRequest verbose>
           <div>Links</div>
           <DeepLinkTransfer />
-          <DeepLinkTransferLegacy />
+          <DeepLinkCompanion />
+          <DeepLinkWallet />
           <div>Companion status</div>
           <Connector />
           <Credentials />
