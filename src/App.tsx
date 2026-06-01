@@ -12,6 +12,7 @@ import { IonicSwap } from "./IonicSwap";
 import { IonicSwapAccept } from "./IonicSwapAccept";
 import { IonicSwapInfo } from "./IonicSwapInfo";
 import { MultiTransfer } from "./MultiTransfer";
+import { Permission } from "./Permission";
 import { RequestSign } from "./RequestSign";
 import { Transfer } from "./Transfer";
 import { WalletBalance } from "./WalletBalance";
@@ -32,6 +33,10 @@ export const App = () => {
           <DeepLinkTransfer />
           <DeepLinkCompanion />
           <DeepLinkWallet />
+          <div>Permissions</div>
+          <Permission type="general" />
+          <Permission type="balance" />
+          <Permission type="history" />
           <div>Companion status</div>
           <Connector />
           <Credentials />

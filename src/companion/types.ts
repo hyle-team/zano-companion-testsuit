@@ -75,6 +75,13 @@ export type GET_WALLET_DATA_RESPONSE = {
   balance: string;
   transactions: GET_WALLET_DATA_TRANSACTION[];
 };
+export type IONIC_SWAP_PARAMS = {
+  destinationAddress: string;
+  destinationAssetID: string;
+  destinationAssetAmount: number | string;
+  currentAssetID: string;
+  currentAssetAmount: number | string;
+};
 export type IONIC_SWAP_RESPONSE = {
   /** Hex-encoded proposal raw data (encrypted with common shared key). Includes half-created transaction template and some extra information that would be needed counterparty to finalize and sign transaction */
   hex_raw_proposal: string;
@@ -83,6 +90,10 @@ export type IONIC_SWAP_ACCEPT_RESPONSE = {
   /** Result transaction ID */
   result_tx_id: string;
 };
+export type TRANSFER_PARAMS = ExclusiveUnion<
+  { assetId: string; destination: string; amount: string },
+  { assetId?: string; destinations: { address: string; amount: string; assetId?: string }[] }
+> & { comment?: string };
 export type TRANSFER_RESPONSE = {
   /** Hash of the generated transaction (if succeeded) */
   tx_hash: string;
@@ -127,31 +138,39 @@ export type CREATE_ALIAS_RESPONSE = {
 export type ASSETS_WHITELIST_ADD_RESPONSE = {
   asset_descriptor: asset_descriptor_with_id;
 };
+export type BURN_ASSET_PARAMS = {
+  assetId: string;
+  burnAmount: string;
+  nativeAmount?: string;
+  pointTxToAddress?: string;
+  serviceEntries?: {
+    body: string;
+    flags: number;
+    instruction: string;
+    security?: string;
+    service_id: string;
+  }[];
+};
 
 export type ZanoCompanionWrappedMethod<Result> = { result: Result; error?: undefined } | { result?: undefined; error: unknown };
+export type ZanoCompanionPermissionName = "general" | "balance" | "history";
+export type ZanoCompanionPermissionStatus = "granted" | "rejected" | "unknown";
 export type ZanoCompanionMethods = {
+  REQUEST_ACCESS(params?: { permissions: { type: ZanoCompanionPermissionName }[] }): ZanoCompanionWrappedMethod<{ success: true }>;
   GET_WALLET_BALANCE(params?: Record<string, never>): ZanoCompanionWrappedMethod<GET_WALLET_BALANCE_RESPONSE>;
   GET_WALLET_DATA(params?: Record<string, never>): GET_WALLET_DATA_RESPONSE;
-  IONIC_SWAP(params: {
-    destinationAddress: string;
-    destinationAssetID: string;
-    destinationAssetAmount: number | string;
-    currentAssetID: string;
-    currentAssetAmount: number | string;
-  }): ZanoCompanionWrappedMethod<IONIC_SWAP_RESPONSE>;
+  IONIC_SWAP(params: IONIC_SWAP_PARAMS): ZanoCompanionWrappedMethod<IONIC_SWAP_RESPONSE>;
   IONIC_SWAP_ACCEPT(params: { hex_raw_proposal: string }): ZanoCompanionWrappedMethod<IONIC_SWAP_ACCEPT_RESPONSE>;
   GET_IONIC_SWAP_PROPOSAL_INFO(params: { hex_raw_proposal: string }): GET_IONIC_SWAP_PROPOSAL_INFO_RESPONSE;
-  TRANSFER(
-    params: ExclusiveUnion<
-      { assetId: string; destination: string; amount: string },
-      { assetId?: string; destinations: { address: string; amount: string; assetId?: string }[] }
-    > & { comment?: string },
-  ): ZanoCompanionWrappedMethod<TRANSFER_RESPONSE>;
+  TRANSFER(params: TRANSFER_PARAMS): ZanoCompanionWrappedMethod<TRANSFER_RESPONSE>;
+  BRIDGING_TRANSFER(params: { assetId: string; amount: string; destinationAddress: string; destinationChainId: string }): never;
   REQUEST_MESSAGE_SIGN(params: { message: string }): ZanoCompanionWrappedMethod<REQUEST_MESSAGE_SIGN_RESPONSE>;
   GET_WHITELIST(params?: Record<string, never>): GET_WHITELIST_RESPONSE;
   ASSETS_WHITELIST_ADD(params: { asset_id: string }): ZanoCompanionWrappedMethod<ASSETS_WHITELIST_ADD_RESPONSE>;
   GET_ALIAS_DETAILS(params: { alias: string }): GET_ALIAS_DETAILS_RESPONSE;
   CREATE_ALIAS(params: { alias: string; comment?: string }): ZanoCompanionWrappedMethod<CREATE_ALIAS_RESPONSE>;
+  BURN_ASSET(params: BURN_ASSET_PARAMS): ZanoCompanionWrappedMethod<{ tx_id: string }>;
 };
+
 export type ZanoCompanionMethodParams<Method extends keyof ZanoCompanionMethods> = Parameters<ZanoCompanionMethods[Method]>[0];
 export type ZanoCompanionMethodResult<Method extends keyof ZanoCompanionMethods> = ReturnType<ZanoCompanionMethods[Method]>;
