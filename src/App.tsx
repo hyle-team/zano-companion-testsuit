@@ -34,9 +34,10 @@ export const App = () => {
           <DeepLinkCompanion />
           <DeepLinkWallet />
           <div>Permissions</div>
-          <Permission type="general" />
-          <Permission type="balance" />
-          <Permission type="history" />
+          <Permission label="general" types={["general"]} />
+          <Permission label="balance" types={["balance"]} />
+          <Permission label="history" types={["history"]} />
+          <Permission label="all" types={["general", "balance", "history"]} />
           <div>Companion status</div>
           <Connector />
           <Credentials />
